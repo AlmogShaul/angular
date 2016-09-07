@@ -28,5 +28,6 @@ export class LowerCasePipe implements PipeTransform {
       throw new InvalidPipeArgumentError(LowerCasePipe, value);
     }
     return value.toLowerCase();
+    //1
   }
 }
