@@ -29,5 +29,6 @@ export class LowerCasePipe implements PipeTransform {
     }
     return value.toLowerCase();
     //1
+    //2
   }
 }
