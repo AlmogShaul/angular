@@ -7,54 +7,39 @@
  */
 
 import {Directive, ElementRef, Renderer, forwardRef} from '@angular/core';
-
 import {NumberWrapper, isBlank} from '../facade/lang';
-
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from './control_value_accessor';
+import {StringWrapper, isBlank, isPresent, isPrimitive, isString, looseIdentical} from '../facade/lang';
+import {Input} from "../../../../../tools/public_api_guard/core/index";
 
-export const TEXT_VALUE_ACCESSOR: any = {
-  provide: NG_VALUE_ACCESSOR,
-  useExisting: forwardRef(() => TextValueAccessor),
-  multi: true
-};
+
 
 /**
  * The accessor for writing a text value and listening to changes that is used by the
- * {@link NgModel}, {@link FormControlDirective}, and {@link FormControlName} directives.
- *
- *  ### Example
- *  ```
- *  <input type="text" [(ngModel)]="age">
- *  ```
  */
 @Directive({
   selector:
-      'input[type=text][formControlName],input[type=text][formControl],input[type=text][ngModel]',
-  host: {
-    '(change)': 'onChange($event.target.value)',
-    '(input)': 'onChange($event.target.value)',
-    '(blur)': 'onTouched()'
-  },
-  providers: [TEXT_VALUE_ACCESSOR]
+      'input[type=text]'
 })
-export class TextValueAccessor implements ControlValueAccessor {
-  onChange = (_: any) => {};
-  onTouched = () => {};
+export class TextValueInput  {
+
+
+  @Input('value')
+  set value(value: any) {
+      this._value = value;
+      if(value == undefined)
+        this._setElementValue(_buildValueString(this.id, ''));
+      else
+        this._setElementValue(_buildValueString(this.id, value));
+  }
+
+  /** @internal */
+  _setElementValue(value: string): void {
+    this._renderer.setElementProperty(this._element.nativeElement, 'value', value);
+  }
+
 
   constructor(private _renderer: Renderer, private _elementRef: ElementRef) {}
 
-  writeValue(value: number): void {
-    // The value needs to be normalized for IE9, otherwise it is set to 'undefined' when undefined
-    const normalizedValue = isBlank(value) ? '' : value;
-    this._renderer.setElementProperty(this._elementRef.nativeElement, 'value', normalizedValue);
-  }
 
-  registerOnChange(fn: (_: number) => void): void {
-    this.onChange = (value) => { fn(value == '' ? null : NumberWrapper.parseFloat(value)); };
-  }
-  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
-
-  setDisabledState(isDisabled: boolean): void {
-    this._renderer.setElementProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
-  }
 }
